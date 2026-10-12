@@ -1,0 +1,55 @@
+{
+  "name": "parserbee",
+  "version": "0.1.0",
+  "description": "Node.js client for the ParserBee document extraction API",
+  "license": "MIT",
+  "author": "ParserBee <support@parserbee.com>",
+  "homepage": "https://parserbee.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ParserBee/parserbee-node.git"
+  },
+  "bugs": "https://github.com/ParserBee/parserbee-node/issues",
+  "keywords": [
+    "parserbee",
+    "ocr",
+    "invoice",
+    "pdf",
+    "document extraction",
+    "data extraction"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts --clean",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "prepare": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.43",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^2.1.9"
+  }
+}
