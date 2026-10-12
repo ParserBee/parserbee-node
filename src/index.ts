@@ -9,4 +9,5 @@ export {
   APIError,
   APIConnectionError,
 } from "./errors.js";
+export type { ExtractInput, ExtractResult } from "./types.js";
 export { VERSION } from "./version.js";

@@ -1,7 +1,24 @@
+import { readFile } from "node:fs/promises";
+import { basename, extname } from "node:path";
 import { APIConnectionError, APIError, errorForStatus, type ErrorBody } from "./errors.js";
+import type { ExtractInput, ExtractResult } from "./types.js";
 import { VERSION } from "./version.js";
 
 export const DEFAULT_BASE_URL = "https://app.parserbee.com";
+
+const MIME_TYPES: Record<string, string> = {
+  ".pdf": "application/pdf",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".webp": "image/webp",
+  ".heic": "image/heic",
+  ".heif": "image/heif",
+};
+
+function mimeTypeFor(fileName: string): string {
+  return MIME_TYPES[extname(fileName).toLowerCase()] ?? "application/octet-stream";
+}
 
 export interface ParserBeeOptions {
   /** API key from Settings in the dashboard. Defaults to the PARSERBEE_API_KEY environment variable. */
@@ -29,6 +46,38 @@ export class ParserBee {
     this.baseUrl = (options.baseUrl ?? DEFAULT_BASE_URL).replace(/\/+$/, "");
     this.timeoutMs = options.timeoutMs ?? 120_000;
     this.fetchImpl = options.fetch ?? globalThis.fetch;
+  }
+
+  /**
+   * Extract structured data from a document with a Parser Template.
+   * Each extraction costs 1 page credit per page processed (minimum 1).
+   */
+  async extract<T = Record<string, unknown>>(templateId: string, input: ExtractInput): Promise<ExtractResult<T>> {
+    if (!templateId) throw new Error("templateId is required");
+
+    if ("fileUrl" in input) {
+      return this.request<ExtractResult<T>>(
+        "POST",
+        "/api/v1/extract",
+        JSON.stringify({ template_id: templateId, file_url: input.fileUrl }),
+        { "Content-Type": "application/json" },
+      );
+    }
+
+    let blob: Blob;
+    let fileName: string;
+    if (typeof input.file === "string") {
+      fileName = input.fileName ?? basename(input.file);
+      blob = new Blob([new Uint8Array(await readFile(input.file))], { type: mimeTypeFor(fileName) });
+    } else {
+      fileName = input.fileName ?? "document";
+      blob = input.file instanceof Blob ? input.file : new Blob([new Uint8Array(input.file)], { type: mimeTypeFor(fileName) });
+    }
+
+    const form = new FormData();
+    form.append("template_id", templateId);
+    form.append("file", blob, fileName);
+    return this.request<ExtractResult<T>>("POST", "/api/v1/extract", form);
   }
 
   protected async request<T>(method: string, path: string, body?: BodyInit, headers: Record<string, string> = {}): Promise<T> {
