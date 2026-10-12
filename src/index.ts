@@ -9,5 +9,13 @@ export {
   APIError,
   APIConnectionError,
 } from "./errors.js";
-export type { ExtractInput, ExtractResult } from "./types.js";
+export type {
+  ActivityDetail,
+  ActivitySummary,
+  Credits,
+  ExtractInput,
+  ExtractResult,
+  Template,
+  TemplateField,
+} from "./types.js";
 export { VERSION } from "./version.js";

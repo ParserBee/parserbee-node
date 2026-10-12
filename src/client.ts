@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { basename, extname } from "node:path";
 import { APIConnectionError, APIError, errorForStatus, type ErrorBody } from "./errors.js";
-import type { ExtractInput, ExtractResult } from "./types.js";
+import type { ActivityDetail, ActivitySummary, Credits, ExtractInput, ExtractResult, ListResponse, Template } from "./types.js";
 import { VERSION } from "./version.js";
 
 export const DEFAULT_BASE_URL = "https://app.parserbee.com";
@@ -78,6 +78,33 @@ export class ParserBee {
     form.append("template_id", templateId);
     form.append("file", blob, fileName);
     return this.request<ExtractResult<T>>("POST", "/api/v1/extract", form);
+  }
+
+  /** Every Parser Template in the account, newest first. */
+  async listTemplates(): Promise<Template[]> {
+    const response = await this.request<ListResponse<Template>>("GET", "/api/v1/templates");
+    return response.items ?? [];
+  }
+
+  /** One Parser Template, with its fields. */
+  getTemplate(templateId: string): Promise<Template> {
+    return this.request<Template>("GET", `/api/v1/templates/${encodeURIComponent(templateId)}`);
+  }
+
+  /** Page credit balance and subscription plan. */
+  getCredits(): Promise<Credits> {
+    return this.request<Credits>("GET", "/api/v1/credits");
+  }
+
+  /** The last 10 extraction requests, newest first. */
+  async listActivity(): Promise<ActivitySummary[]> {
+    const response = await this.request<ListResponse<ActivitySummary>>("GET", "/api/v1/activity");
+    return response.items ?? [];
+  }
+
+  /** One extraction request, including the extracted data. */
+  getActivity<T = Record<string, unknown>>(requestId: string): Promise<ActivityDetail<T>> {
+    return this.request<ActivityDetail<T>>("GET", `/api/v1/activity/${encodeURIComponent(requestId)}`);
   }
 
   protected async request<T>(method: string, path: string, body?: BodyInit, headers: Record<string, string> = {}): Promise<T> {
