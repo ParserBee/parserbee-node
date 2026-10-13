@@ -5,7 +5,7 @@ Node.js and TypeScript client for the [ParserBee](https://parserbee.com) API. Se
 ## Install
 
 ```bash
-npm install github:ParserBee/parserbee-node
+npm install parserbee
 ```
 
 Requires Node.js 18 or later. Works with ES modules and CommonJS, and ships TypeScript types.
@@ -120,7 +120,7 @@ try {
 
 ## Examples
 
-The [examples](examples) folder has scripts you can run as they are:
+The [examples](https://github.com/ParserBee/parserbee-node/tree/main/examples) folder has scripts you can run as they are:
 
 - `extract-invoice.mjs`: one file, printed as JSON
 - `extract-from-url.mjs`: a document that is already online
